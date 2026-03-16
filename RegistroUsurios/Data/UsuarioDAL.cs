@@ -1,95 +1,163 @@
 ﻿using RegistroUsurios.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Data.SqlClient;
 
 namespace RegistroUsurios.Data
 {
     public class UsuarioDAL
     {
-        // ============================
-        // MÉTODOS QUE EL ESTUDIANTE DEBE CREAR
-        // ============================
-
-        // 1. Crear un método para LISTAR todos los usuarios
-        // Este método debe devolver una lista de tipo List<Usuario>
-        // Sugerencia de nombre: ObtenerTodos()
+        // 1. LISTAR todos los usuarios
         public List<Usuario> ObtenerTodos()
         {
-            // Aquí el estudiante debe:
-            // 1. Crear la lista de usuarios
-            // 2. Abrir conexión a la base de datos
-            // 3. Ejecutar un SELECT * FROM Usuarios
-            // 4. Recorrer los resultados con SqlDataReader
-            // 5. Guardar cada registro en un objeto Usuario
-            // 6. Agregar cada usuario a la lista
-            // 7. Retornar la lista
+            List<Usuario> lista = new List<Usuario>();
 
-            throw new System.NotImplementedException();
+            using (SqlConnection con = new SqlConnection(Conexion.Cadena))
+            {
+                string query = "SELECT Id, Nombres, Apellidos, Correo, Edad, Activo FROM Usuarios";
+                SqlCommand cmd = new SqlCommand(query, con);
+
+                try
+                {
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            lista.Add(new Usuario
+                            {
+                                Id = Convert.ToInt32(reader["Id"]),
+                                Nombres = reader["Nombres"].ToString(),
+                                Apellidos = reader["Apellidos"].ToString(),
+                                Correo = reader["Correo"].ToString(),
+                                Edad = Convert.ToInt32(reader["Edad"]),
+                                Activo = Convert.ToBoolean(reader["Activo"])
+                            });
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error al obtener los usuarios: " + ex.Message);
+                }
+            }
+            return lista;
         }
 
-        // 2. Crear un método para BUSCAR un usuario por ID
-        // Este método debe devolver un objeto Usuario
-        // Sugerencia de nombre: ObtenerPorId(int id)
+        // 2. BUSCAR un usuario por ID
         public Usuario ObtenerPorId(int id)
         {
-            // Aquí el estudiante debe:
-            // 1. Abrir conexión
-            // 2. Ejecutar un SELECT con WHERE Id = @Id
-            // 3. Usar parámetros
-            // 4. Leer el resultado
-            // 5. Si encuentra el registro, devolver un objeto Usuario
-            // 6. Si no lo encuentra, devolver null
+            Usuario usuario = null;
 
-            throw new System.NotImplementedException();
+            using (SqlConnection con = new SqlConnection(Conexion.Cadena))
+            {
+                string query = "SELECT Id, Nombres, Apellidos, Correo, Edad, Activo FROM Usuarios WHERE Id = @Id";
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@Id", id);
+
+                try
+                {
+                    con.Open();
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            usuario = new Usuario
+                            {
+                                Id = Convert.ToInt32(reader["Id"]),
+                                Nombres = reader["Nombres"].ToString(),
+                                Apellidos = reader["Apellidos"].ToString(),
+                                Correo = reader["Correo"].ToString(),
+                                Edad = Convert.ToInt32(reader["Edad"]),
+                                Activo = Convert.ToBoolean(reader["Activo"])
+                            };
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error al buscar el usuario: " + ex.Message);
+                }
+            }
+            return usuario;
         }
 
-        // 3. Crear un método para INSERTAR un usuario
-        // Este método debe devolver true si se insertó correctamente
-        // Sugerencia de nombre: Insertar(Usuario usuario)
+        // 3. INSERTAR un usuario
         public bool Insertar(Usuario usuario)
         {
-            // Aquí el estudiante debe:
-            // 1. Abrir conexión
-            // 2. Crear un INSERT INTO Usuarios(...)
-            // 3. Usar parámetros con AddWithValue
-            // 4. Ejecutar ExecuteNonQuery()
-            // 5. Retornar true si filas afectadas > 0
+            using (SqlConnection con = new SqlConnection(Conexion.Cadena))
+            {
+                string query = "INSERT INTO Usuarios (Nombres, Apellidos, Correo, Edad, Activo) VALUES (@Nombres, @Apellidos, @Correo, @Edad, @Activo)";
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@Nombres", usuario.Nombres);
+                cmd.Parameters.AddWithValue("@Apellidos", usuario.Apellidos);
+                cmd.Parameters.AddWithValue("@Correo", usuario.Correo);
+                cmd.Parameters.AddWithValue("@Edad", usuario.Edad);
+                cmd.Parameters.AddWithValue("@Activo", usuario.Activo);
 
-            throw new System.NotImplementedException();
+                try
+                {
+                    con.Open();
+                    int filasAfectadas = cmd.ExecuteNonQuery();
+                    return filasAfectadas > 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error al registrar el usuario: " + ex.Message);
+                    return false;
+                }
+            }
         }
 
-        // 4. Crear un método para ACTUALIZAR un usuario
-        // Este método debe devolver true si se actualizó correctamente
-        // Sugerencia de nombre: Actualizar(Usuario usuario)
+        // 4. ACTUALIZAR un usuario
         public bool Actualizar(Usuario usuario)
         {
-            // Aquí el estudiante debe:
-            // 1. Abrir conexión
-            // 2. Crear un UPDATE Usuarios SET ...
-            // 3. Actualizar Nombres, Apellidos, Correo, Edad y Activo
-            // 4. Filtrar por Id
-            // 5. Ejecutar ExecuteNonQuery()
-            // 6. Retornar true si filas afectadas > 0
+            using (SqlConnection con = new SqlConnection(Conexion.Cadena))
+            {
+                string query = "UPDATE Usuarios SET Nombres = @Nombres, Apellidos = @Apellidos, Correo = @Correo, Edad = @Edad, Activo = @Activo WHERE Id = @Id";
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@Id", usuario.Id);
+                cmd.Parameters.AddWithValue("@Nombres", usuario.Nombres);
+                cmd.Parameters.AddWithValue("@Apellidos", usuario.Apellidos);
+                cmd.Parameters.AddWithValue("@Correo", usuario.Correo);
+                cmd.Parameters.AddWithValue("@Edad", usuario.Edad);
+                cmd.Parameters.AddWithValue("@Activo", usuario.Activo);
 
-            throw new System.NotImplementedException();
+                try
+                {
+                    con.Open();
+                    int filasAfectadas = cmd.ExecuteNonQuery();
+                    return filasAfectadas > 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error al actualizar el usuario: " + ex.Message);
+                    return false;
+                }
+            }
         }
 
-        // 5. Crear un método para ELIMINAR un usuario por ID
-        // Este método debe devolver true si se eliminó correctamente
-        // Sugerencia de nombre: Eliminar(int id)
+        // 5. ELIMINAR un usuario por ID
         public bool Eliminar(int id)
         {
-            // Aquí el estudiante debe:
-            // 1. Abrir conexión
-            // 2. Crear un DELETE FROM Usuarios WHERE Id = @Id
-            // 3. Usar parámetro
-            // 4. Ejecutar ExecuteNonQuery()
-            // 5. Retornar true si filas afectadas > 0
+            using (SqlConnection con = new SqlConnection(Conexion.Cadena))
+            {
+                string query = "DELETE FROM Usuarios WHERE Id = @Id";
+                SqlCommand cmd = new SqlCommand(query, con);
+                cmd.Parameters.AddWithValue("@Id", id);
 
-            throw new System.NotImplementedException();
+                try
+                {
+                    con.Open();
+                    int filasAfectadas = cmd.ExecuteNonQuery();
+                    return filasAfectadas > 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error al eliminar el usuario: " + ex.Message);
+                    return false;
+                }
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using RegistroUsurios.Data;
+using RegistroUsurios.Models; // Agregamos esto para que reconozca la clase Usuario
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -72,61 +73,172 @@ namespace RegistroUsurios
 
         static void ListarUsuarios()
         {
-            // El estudiante debe:
-            // 1. Llamar usuarioDAL.ObtenerTodos()
-            // 2. Guardar la lista en una variable
-            // 3. Validar si la lista está vacía
-            // 4. Mostrar cada usuario en pantalla
+            Console.WriteLine("--- LISTA DE USUARIOS ---");
 
-            Console.WriteLine("Método pendiente de completar.");
+            var listaUsuarios = usuarioDAL.ObtenerTodos();
+
+            if (listaUsuarios == null || listaUsuarios.Count == 0)
+            {
+                Console.WriteLine("No hay usuarios registrados en el sistema.");
+                return;
+            }
+
+            foreach (var u in listaUsuarios)
+            {
+                // Como le pusiste un ToString() súper bueno a tu clase Usuario, solo imprimimos la "u"
+                Console.WriteLine(u);
+            }
         }
 
         static void BuscarUsuarioPorId()
         {
-            // El estudiante debe:
-            // 1. Pedir el ID
-            // 2. Validar que sea numérico
-            // 3. Llamar usuarioDAL.ObtenerPorId(id)
-            // 4. Mostrar el usuario si existe
-            // 5. Mostrar mensaje si no existe
+            Console.WriteLine("--- BUSCAR USUARIO ---");
+            Console.Write("Ingrese el ID del usuario que desea buscar: ");
 
-            Console.WriteLine("Método pendiente de completar.");
+            if (int.TryParse(Console.ReadLine(), out int idBuscado))
+            {
+                var usuario = usuarioDAL.ObtenerPorId(idBuscado);
+
+                if (usuario != null)
+                {
+                    Console.WriteLine("\nUsuario encontrado:");
+                    Console.WriteLine(usuario); // Usa tu ToString()
+                }
+                else
+                {
+                    Console.WriteLine("\nEl usuario con ese ID no existe.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Error: Por favor ingrese un número de ID válido.");
+            }
         }
 
         static void RegistrarUsuario()
         {
-            // El estudiante debe:
-            // 1. Crear un objeto Usuario
-            // 2. Pedir nombres, apellidos, correo y edad
-            // 3. Asignar Activo = true
-            // 4. Llamar usuarioDAL.Insertar(usuario)
-            // 5. Mostrar mensaje según el resultado
+            Console.WriteLine("--- REGISTRAR NUEVO USUARIO ---");
 
-            Console.WriteLine("Método pendiente de completar.");
+            Console.Write("Ingrese los nombres: ");
+            string nombres = Console.ReadLine();
+
+            Console.Write("Ingrese los apellidos: ");
+            string apellidos = Console.ReadLine();
+
+            Console.Write("Ingrese el correo: ");
+            string correo = Console.ReadLine();
+
+            Console.Write("Ingrese la edad: ");
+            if (!int.TryParse(Console.ReadLine(), out int edad))
+            {
+                Console.WriteLine("Edad no válida. Registro cancelado.");
+                return;
+            }
+
+            var nuevoUsuario = new Usuario
+            {
+                Nombres = nombres,
+                Apellidos = apellidos,
+                Correo = correo,
+                Edad = edad,
+                Activo = true
+            };
+
+            bool resultado = usuarioDAL.Insertar(nuevoUsuario);
+
+            if (resultado)
+                Console.WriteLine("\n¡Usuario registrado con éxito!");
+            else
+                Console.WriteLine("\nHubo un error al intentar registrar el usuario.");
         }
 
         static void ActualizarUsuario()
         {
-            // El estudiante debe:
-            // 1. Pedir ID
-            // 2. Buscar si el usuario existe con usuarioDAL.ObtenerPorId(id)
-            // 3. Si existe, pedir nuevos datos
-            // 4. Llamar usuarioDAL.Actualizar(usuario)
-            // 5. Mostrar mensaje de éxito o error
+            Console.WriteLine("--- ACTUALIZAR USUARIO ---");
 
-            Console.WriteLine("Método pendiente de completar.");
+            Console.Write("Ingrese el ID del usuario que desea actualizar: ");
+            if (int.TryParse(Console.ReadLine(), out int idActualizar))
+            {
+                var usuarioExistente = usuarioDAL.ObtenerPorId(idActualizar);
+
+                if (usuarioExistente != null)
+                {
+                    Console.WriteLine($"\nEditando a: {usuarioExistente.Nombres} {usuarioExistente.Apellidos}");
+
+                    Console.Write("Nuevos nombres (deje en blanco para no cambiar): ");
+                    string nuevosNombres = Console.ReadLine();
+                    if (!string.IsNullOrWhiteSpace(nuevosNombres)) usuarioExistente.Nombres = nuevosNombres;
+
+                    Console.Write("Nuevos apellidos (deje en blanco para no cambiar): ");
+                    string nuevosApellidos = Console.ReadLine();
+                    if (!string.IsNullOrWhiteSpace(nuevosApellidos)) usuarioExistente.Apellidos = nuevosApellidos;
+
+                    Console.Write("Nuevo correo (deje en blanco para no cambiar): ");
+                    string nuevoCorreo = Console.ReadLine();
+                    if (!string.IsNullOrWhiteSpace(nuevoCorreo)) usuarioExistente.Correo = nuevoCorreo;
+
+                    Console.Write("Nueva edad (deje en blanco o ponga 0 para no cambiar): ");
+                    if (int.TryParse(Console.ReadLine(), out int nuevaEdad) && nuevaEdad > 0)
+                    {
+                        usuarioExistente.Edad = nuevaEdad;
+                    }
+
+                    bool actualizado = usuarioDAL.Actualizar(usuarioExistente);
+
+                    if (actualizado)
+                        Console.WriteLine("\n¡Usuario actualizado exitosamente!");
+                    else
+                        Console.WriteLine("\nError al actualizar el usuario en la base de datos.");
+                }
+                else
+                {
+                    Console.WriteLine("\nNo se encontró un usuario con ese ID para actualizar.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Error: Por favor ingrese un número de ID válido.");
+            }
         }
 
         static void EliminarUsuario()
         {
-            // El estudiante debe:
-            // 1. Pedir ID
-            // 2. Buscar si el usuario existe
-            // 3. Confirmar eliminación
-            // 4. Llamar usuarioDAL.Eliminar(id)
-            // 5. Mostrar mensaje según el resultado
+            Console.WriteLine("--- ELIMINAR USUARIO ---");
 
-            Console.WriteLine("Método pendiente de completar.");
+            Console.Write("Ingrese el ID del usuario que desea eliminar: ");
+            if (int.TryParse(Console.ReadLine(), out int idEliminar))
+            {
+                var usuarioExistente = usuarioDAL.ObtenerPorId(idEliminar);
+
+                if (usuarioExistente != null)
+                {
+                    Console.WriteLine($"\nEstá a punto de eliminar a: {usuarioExistente.Nombres} {usuarioExistente.Apellidos}");
+                    Console.Write("¿Está seguro? (S/N): ");
+                    string confirmacion = Console.ReadLine();
+
+                    if (confirmacion.Trim().ToUpper() == "S")
+                    {
+                        bool eliminado = usuarioDAL.Eliminar(idEliminar);
+
+                        if (eliminado)
+                            Console.WriteLine("\n¡Usuario eliminado correctamente!");
+                        else
+                            Console.WriteLine("\nError al intentar eliminar al usuario.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("\nEliminación cancelada.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("\nNo se encontró ningún usuario con ese ID.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Error: Por favor ingrese un número de ID válido.");
+            }
         }
     }
 }

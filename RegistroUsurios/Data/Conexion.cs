@@ -9,6 +9,6 @@ namespace RegistroUsurios.Data
     public static class Conexion
     {
         // Cambiar esta cadena según el servidor del estudiante
-        public static string Cadena = @"Data Source=.\SQLEXPRESS;Initial Catalog=CrudUsuariosDB;Integrated Security=True;";
+        public static string Cadena = "Server=localhost;Database=CrudUsuariosDB;Integrated Security=True;TrustServerCertificate=True;";
     }
 }
